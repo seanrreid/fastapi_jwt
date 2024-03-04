@@ -1,8 +1,8 @@
-"""Adding Foreign Key constraint
+"""Added Foreign Key to Links
 
-Revision ID: 29719a32d65c
-Revises: aceff0440eb9
-Create Date: 2024-03-03 19:42:19.042535
+Revision ID: a5326c831d5c
+Revises: b62921300e6c
+Create Date: 2024-03-03 23:20:38.828348
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '29719a32d65c'
-down_revision: Union[str, None] = 'aceff0440eb9'
+revision: str = 'a5326c831d5c'
+down_revision: Union[str, None] = 'b62921300e6c'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
