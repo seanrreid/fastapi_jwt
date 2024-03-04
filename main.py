@@ -64,3 +64,7 @@ async def add_link(link_data: LinksModel):
     session.add(link)
     session.commit()
     return {"Link Added": link.title}
+
+@app.post('/login')
+async def login():
+    pass
