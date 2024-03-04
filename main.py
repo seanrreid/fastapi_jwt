@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from typing import Dict
+from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import date
@@ -9,7 +10,10 @@ from db import engine, session
 from config import settings
 
 # These are our models
-from models import Base, Links, LinksModel
+from models.base import Base
+from models.links import Links, LinksSchema
+from models.users import User, UserSchema, UserAccountSchema
+from services import create_user, get_user
 
 
 def create_tables():
@@ -56,15 +60,36 @@ def get_links():
 
 
 @app.post('/links/add')
-async def add_link(link_data: LinksModel):
-    link = Links(title=link_data.title,
-                 long_url=link_data.long_url,
-                 short_url=link_data.short_url,
-                 user_id=1)
+async def add_link(link_data: LinksSchema):
+    link = Links(**link_data.dict())
     session.add(link)
     session.commit()
     return {"Link Added": link.title}
 
-@app.post('/login')
-async def login():
-    pass
+
+@app.post('/register', response_model=UserSchema)
+def register_user(payload: UserAccountSchema):
+    """Processes request to register user account."""
+    payload.hashed_password = User.hash_password(payload.hashed_password)
+    return create_user(user=payload)
+
+
+@app.post('/login', response_model=Dict)
+async def login(payload: UserAccountSchema):
+    try:
+        user: User = get_user(email=payload.email)
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user credentials"
+        )
+
+    is_validated: bool = user.validate_password(payload.hashed_password)
+
+    if not is_validated:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user credentials"
+        )
+
+    return user.generate_token()
